@@ -18,14 +18,17 @@ public class NeuralNetwork {
 	public NeuralNetwork(int[] topology) {
 		nodes = new double[topology.length][];
 		errors = new double[topology.length][];
-		bias_weights = new double[topology.length][];
+		bias_weights = new double[topology.length-1][];
 		
 		for(int layer = 0; layer < nodes.length; layer++) {
 			nodes[layer] = new double[topology[layer]];
 			errors[layer] = new double[topology[layer]];
-			bias_weights[layer] = new double[topology[layer]];
-			for(int w = 0; w < bias_weights[layer].length; w++) {
-				bias_weights[layer][w] = Math.random();
+		}
+		
+		for(int layer = 1; layer < nodes.length; layer++) {
+			bias_weights[layer-1] = new double[topology[layer]];
+			for(int w = 0; w < bias_weights[layer-1].length; w++) {
+				bias_weights[layer-1][w] = Math.random();
 			}
 		}
 		
@@ -140,12 +143,12 @@ public class NeuralNetwork {
 	public void calculateLayer(int layer) {
 		if(layer == nodes.length-1) {
 			for(int node = 0; node < nodes[layer].length; node++) {
-				nodes[layer][node] = Formulas.sigmoid(multiplySum(nodes[layer-1],weights[layer-1][node]) + bias_weights[layer][node],false);
+				nodes[layer][node] = Formulas.sigmoid(multiplySum(nodes[layer-1],weights[layer-1][node]) + bias_weights[layer-1][node],false);
 			}
 		}
 		else {
 			for(int node = 0; node < nodes[layer].length; node++) {
-				nodes[layer][node] = Formulas.relu(multiplySum(nodes[layer-1],weights[layer-1][node]) + bias_weights[layer][node],false);
+				nodes[layer][node] = Formulas.relu(multiplySum(nodes[layer-1],weights[layer-1][node]) + bias_weights[layer-1][node],false);
 			}
 		}
 	}
@@ -189,9 +192,9 @@ public class NeuralNetwork {
 			}
 		}
 		
-		for(int layer = 1; layer < bias_weights.length; layer++) {
-			for(int node = 0; node < bias_weights[layer].length; node++) {
-				bias_weights[layer][node] += (learning_rate * errors[layer][node]);
+		for(int layer = 1; layer <= bias_weights.length; layer++) {
+			for(int node = 0; node < bias_weights[layer-1].length; node++) {
+				bias_weights[layer-1][node] += (learning_rate * errors[layer][node]);
 			}
 		}
 		
@@ -213,7 +216,7 @@ public class NeuralNetwork {
 		int[] topology = {2,2,1};
 		double[][][] datas = {{{0,0},{0}},{{1,0},{1}},{{0,1},{1}},{{1,1},{1}}};
 		NeuralNetwork test = new NeuralNetwork(topology);
-		test.load("network1.txt");
+		//test.load("network1.txt");
 		System.out.println(Arrays.deepToString(test.weights));
 		int r = (int)(Math.random()*4);
 		for(int i = 0; i < 10000; i++) {
